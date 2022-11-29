@@ -1,0 +1,36 @@
+.item1 { grid-area: header_map; }
+.item2 { grid-area: map; }
+.item3 { grid-area: puzzle; }
+.item4 { grid-area: desk; }
+.item5 { grid-area: footer; }
+.item6 { grid-area: header_puzzle; }
+
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    "header_map header_puzzle"
+    "map puzzle"
+    "desk desk"
+    "footer footer";
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 14, 14, 0.8);
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#map{
+  width:49vw;
+  height:49vh;
+}
+.item4
+{
+  width:100vw;
+}
+.puz{ 
+  margin: 0px;
+  padding: 0px;
+}
