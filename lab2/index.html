@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="./styles/style.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo List</title>
+</head>
+
+<body>
+    <header>
+        <div class="col-12 header">
+            <p>To Do List</p> 
+        </div>
+    </header>
+    <!-- navigation -->
+    <nav>
+        <div class="col-2 col-s-1 main">
+        </div>
+    </nav> 
+
+    <!-- Article -->
+    <article>
+        <div class="col-7 col-s-10 main">
+
+            <div class="col-12 col-s-12 search ">
+                <input id="search_input" type="text" placeholder="Search.." class="search_box col-10">
+                <button onclick="btnSearch()" class="col-2 search_button">
+                    <p>Search</p>
+                </button>
+                <input id="AddInput" type="text" placeholder="Add.." class="search_box col-8">
+                <input id="Data" type="date" placeholder="Add.." class="search_box col-2">
+
+                <button onclick="btnAdd()" class="col-2 search_button">
+                    <p>Add</p>
+                </button>
+            </div>
+            <div id="list" class="article">
+            </div>
+        </div>
+    </article><!-- tresc na srodku h1 - h3 + paragrafy + obrazki + obraz z tyłu -->
+
+    <!-- Ad -->
+    <div class="col-3 col-s-1 main"> <!-- reklama po prawej stronie-->
+       
+    </div> 
+
+    <!-- site footer -->
+    <footer>
+        <div class="col-12 col-s-12 footer">
+            <p>Creator: Piotr Żółkiewski</p>
+        </div>
+    </footer>
+</body>
+
+<script>
+
+    const dateNow = new Date(); // todays date
+
+    // pls don't ask me what going on here... 
+    // for some reason every line is a string as it should be
+    // but when you combine lines into single variable it takes value 2 ....
+    // making calculation in parts was the easiest solution to repair that JavaScript :)
+    var part1 = ''+dateNow.getFullYear()+'-';
+    var part2 = dateNow.getMonth() < 9 ? '0'+(dateNow.getMonth()+1)+'-' : (dateNow.getMonth()+1)+'-';
+    var part3 = dateNow.getDate() < 10 ? '0'+dateNow.getDate() : dateNow.getDate();
+    document.getElementById("Data").value = part1+part2+part3;
+
+    function ToDoFromTemplate(item, value,date)
+    { 
+        var newElement = `
+                        <span id="${item}" class="col-12  col-s-12 data">
+                            <input id="${item}_input" class="col-8 cols-s-9 text list-el-text" type="hidden" value="${value}">
+                            <label id="${item}_label" style="display:block;" class="col-8 cols-s-9 text list-el-text"> ${value} </label>
+                            <input id="${item}_input_date" class="col-2 cols-s-2 text list-el-text" type="hidden" value="${date}">
+                            <label id="${item}_label_date" style="display:block;" class="col-2 cols-s-2 text list-el-text"> ${date} </label>
+                            <button onclick="btnEdit('${item}')" id="${item}_edit" class="col-1 col-s-1 delete_button list-el">
+                                edit
+                            </button>
+                            <button onclick="btnDelete('${item}')" class="col-1 col-s-1 edit_button list-el">
+                                delete
+                            </button>
+                        </span>
+                `
+        return newElement;
+    }
+
+
+
+    var highestId = 0;
+    // window.localStorage.clear();
+    function load(count = false){
+        var id = 0;
+        var items = { ...localStorage };
+        var list = document.getElementById('list');
+
+        for(item in items)
+        {
+            var value = window.localStorage.getItem(item);
+            var tmp = JSON.parse(value);
+            var newElement = ToDoFromTemplate(item, tmp.text,tmp.date)
+            list.innerHTML = newElement + "\n" + list.innerHTML;
+
+            id++;
+            if(count)
+            {
+                highestId++;
+            }
+        }
+    }
+    load(true);
+
+    function btnDelete(id)
+    {
+        //delete data from storage
+        window.localStorage.removeItem(id);
+        document.getElementById(id).remove();
+    }
+
+    function btnEdit(id)
+    {
+        var input = document.getElementById(id+'_input');
+        var label = document.getElementById(id+'_label');
+        var edit = document.getElementById(id+'_edit');
+        var data = document.getElementById(id+"_input_date");
+        var data_label = document.getElementById(id+"_label_date");
+
+        if(input.type == "hidden")
+        {
+            input.type = "text";
+            label.style.display="none";
+            data.type = "date";
+            data_label.style.display="none";
+            edit.innerHTML = "save";
+
+        }
+        else
+        {
+            // save value in storage 
+            var item = {text: input.value, date: data.value};
+            var item_str = JSON.stringify(item);
+
+            window.localStorage.setItem(id, item_str);
+
+
+            input.type = "hidden";
+            label.style.display="block";
+            label.innerHTML = input.value;
+            data.type = "hidden";
+            data_label.style.display="block";
+            data_label.innerHTML = data.value;
+
+
+            edit.innerHTML = "edit";
+        }
+       
+    }
+
+    function btnSearch(){
+        var list = document.getElementById('list');
+        var search = document.getElementById('search_input').value;
+
+
+        // we don't searcb for empty strings. we reset the list tho
+        if(search.replace(/\s/g, '') == "")
+        {
+            list.innerHTML = "";
+            load();
+            return;
+        }
+
+        var items = { ...localStorage };
+        list.innerHTML = "";
+        
+        for(item in items)
+        {
+            var value = window.localStorage.getItem(item);
+            value = value.toString().toLowerCase();
+            search = search.toString().toLowerCase();
+            var test = value.indexOf(search);
+            
+            if(test != -1)
+            {
+                var value = window.localStorage.getItem(item);
+                var tmp = JSON.parse(value);
+
+                var newElement = ToDoFromTemplate(item,tmp.text,tmp.date);
+                list.innerHTML += "\n"+newElement;
+
+                const label = document.querySelector(`#${item}_label`);
+                const text = label.innerText;
+                const newText = text.replaceAll(`${search}`, `<span style="background-color: yellow;">${search}</span>`);
+                label.innerHTML = newText;
+                
+            }
+        }
+    }
+
+    
+    function btnAdd()
+    {
+        var input = document.getElementById("AddInput");
+        var data = document.getElementById("Data");
+        var tmp = new Date(data.value);
+        if(input.value.replace(/\s/g, '') == "" || (dateNow.getFullYear() > tmp.getFullYear()) || (dateNow.getFullYear() == tmp.getFullYear() && dateNow.getMonth() > tmp.getMonth()) || (dateNow.getFullYear() <= tmp.getFullYear() && dateNow.getMonth() == tmp.getMonth() && dateNow.getDate()>tmp.getDate()))
+        {
+            console.log(dateNow.getDay());
+            console.log(tmp.getDay());
+            alert(`string can't be empty and date can't be from past!`);
+            return;
+        }
+        highestId++;
+        var item = {text: input.value, date: data.value};
+        var item_str = JSON.stringify(item);
+        window.localStorage.setItem('todo_'+highestId, item_str);
+
+        var list = document.getElementById('list');
+        var newElement = ToDoFromTemplate(highestId,input.value, data.value);
+        list.innerHTML = newElement + "\n" + list.innerHTML;
+
+        
+        input.value = "";
+    }
+
+
+</script>
+
+
+</html>
