@@ -176,15 +176,13 @@
         for(item in items)
         {
             var value = window.localStorage.getItem(item);
-            value = value.toString().toLowerCase();
+            var tmp = JSON.parse(value);
+            value = tmp.text.toString().toLowerCase();
             search = search.toString().toLowerCase();
             var test = value.indexOf(search);
             
             if(test != -1)
             {
-                var value = window.localStorage.getItem(item);
-                var tmp = JSON.parse(value);
-
                 var newElement = ToDoFromTemplate(item,tmp.text,tmp.date);
                 list.innerHTML += "\n"+newElement;
 
